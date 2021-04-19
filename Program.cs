@@ -22,14 +22,29 @@ namespace NorthwindConsole
                 string choice;
                 do
                 {
-                    Console.WriteLine("1) Display Categories");
+                    //2
+                    Console.WriteLine("1) Display all Categories");
                     Console.WriteLine("2) Add Category");
-                    Console.WriteLine("3) Display Category and related products");
-                    Console.WriteLine("4) Display all Categories and their related products");
+                    Console.WriteLine("3) Edit record from Categories");
+                    Console.WriteLine("4) Delete record from Categories"); //3
+                    Console.WriteLine("5) Display specified Category and all related products");
+                    Console.WriteLine("6) Display specified Category and active products");
+                    Console.WriteLine("7) Display all Categories and their related products");
+                    Console.WriteLine("8) Display all Categories and active products");
+                    //1
+                    Console.WriteLine("9) Display all Products");
+                    Console.WriteLine("10) Display specified Product");
+                    Console.WriteLine("11) Add new record to Products");
+                    Console.WriteLine("12) Edit record from Products");
+                    Console.WriteLine("13) Delete record from Products"); //3
+                   
+                    //4??
                     Console.WriteLine("\"q\" to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
                     logger.Info($"Option {choice} selected");
+                    
+                    //1 Display all Categories
                     if (choice == "1")
                     {
                         var db = new NWConsole_96_EXGContext();
@@ -44,7 +59,9 @@ namespace NorthwindConsole
                         }
                         Console.ForegroundColor = ConsoleColor.White;
                     }
-                     else if (choice == "2")
+                    
+                    //Add record to category
+                    else if (choice == "2")
                     {
                         Categories category = new Categories();
                         Console.WriteLine("Enter Category Name:");
@@ -82,6 +99,8 @@ namespace NorthwindConsole
                         }
 
                     }
+
+                    //Display specified category + all rel products
                     else if (choice == "3")
                     {
                         var db = new NWConsole_96_EXGContext();
@@ -104,6 +123,8 @@ namespace NorthwindConsole
                             Console.WriteLine(p.ProductName);
                         }
                     }
+
+                    //display all categories + all related products
                     else if (choice == "4")
                     {
                         var db = new NWConsole_96_EXGContext();
