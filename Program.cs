@@ -143,7 +143,7 @@ namespace NorthwindConsole
                     // 8) Display all Categories and active products
                     // 9) Display Products
                     else if (choice == "9"){
-                        Console.WriteLine("Display Products \n1) All Products \n2) Discontinued Products \n3) Active Products");
+                        Console.WriteLine("\nDisplay Products \n1) All Products \n2) Discontinued Products \n3) Active Products");
                         string userChoice = Console.ReadLine(); 
                         logger.Info($"Display Products - Option {userChoice} selected");
 
@@ -169,6 +169,10 @@ namespace NorthwindConsole
                         }
                         else if(userChoice == "3"){
                             //display all active
+                            var query = db.Products.Where(p => p.Discontinued == false).OrderBy(p => p.ProductId); 
+                            foreach(var product in query){
+                                Console.WriteLine($"{product.ProductName}");
+                            } 
                         }
                     }
                     // 10) Display specified Products
