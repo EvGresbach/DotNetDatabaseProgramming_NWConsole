@@ -176,6 +176,18 @@ namespace NorthwindConsole
                         }
                     }
                     // 10) Display specified Products
+                    else if(choice == "10"){
+                        //Ask for Name
+                        Console.Write("Enter product name: ");
+                        string productName = Console.ReadLine();
+                        //display all fields
+                        var db = new NWConsole_96_EXGContext();
+                        Products product = db.Products.FirstOrDefault(p => p.ProductName == productName);
+
+                        Console.WriteLine("{0}:\nProduct ID: {1} \nSupplier ID: {2} \nCategory ID: {3}\nQuantity per Unit: {4}\nUnit Price: {5:n2}\nUnits in Stock: {6}\nUnits on Order: {7}\nReorder Level: {8}\nDiscontinued: {9}\n", 
+                        product.ProductName, product.ProductId, product.SupplierId, product.CategoryId, product.QuantityPerUnit, product.UnitPrice, product.UnitsInStock,  
+                        product.UnitsOnOrder, product.ReorderLevel, product.Discontinued);
+                    }
                     // 11) Add new record to Products
                     // 12) Edit record from Products
                     // 13) Delete record from Products
