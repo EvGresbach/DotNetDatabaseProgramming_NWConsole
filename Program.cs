@@ -145,7 +145,7 @@ namespace NorthwindConsole
                     else if (choice == "9"){
                         Console.WriteLine("Display Products \n1) All Products \n2) Discontinued Products \n3) Active Products");
                         string userChoice = Console.ReadLine(); 
-                        logger.Info($"Display Products - Option {choice} selected");
+                        logger.Info($"Display Products - Option {userChoice} selected");
 
                         var db = new NWConsole_96_EXGContext(); 
                         if(userChoice == "1"){
@@ -160,7 +160,12 @@ namespace NorthwindConsole
                         }
                         else if(userChoice == "2"){
                             //display all discontinued
-                            
+                            var query = db.Products.Where(p => p.Discontinued == true).OrderBy(p => p.ProductId); 
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            foreach(var product in query){
+                                Console.WriteLine($"{product.ProductName}");
+                            }
+                            Console.ForegroundColor = ConsoleColor.White; 
                         }
                         else if(userChoice == "3"){
                             //display all active
