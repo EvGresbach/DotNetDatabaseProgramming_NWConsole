@@ -189,8 +189,42 @@ namespace NorthwindConsole
                         product.UnitsOnOrder, product.ReorderLevel, product.Discontinued);
                     }
                     // 11) Add new record to Products
+                    else if(choice == "11"){
+                        //create product
+                        Products product = new Products();
+                        //get info
+                        //add info to product
+                        Console.WriteLine("Enter Product Name: "); 
+                        product.ProductName = Console.ReadLine();
+                        Console.WriteLine("Enter Supplier ID: "); 
+                        product.SupplierId = Int32.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Category ID: "); 
+                        product.CategoryId = Int32.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Quantity per Unit: "); 
+                        product.QuantityPerUnit = Console.ReadLine();
+                        Console.WriteLine("Enter Unit Price: "); 
+                        product.UnitPrice = Decimal.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Units in Stock: "); 
+                        product.UnitsInStock = short.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Units on Order: "); 
+                        product.UnitsOnOrder = short.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Reorder Level: "); 
+                        product.ReorderLevel = short.Parse(Console.ReadLine());
+                        Console.WriteLine("Enter Discontinued: "); 
+                        product.Discontinued = bool.Parse(Console.ReadLine());
+                        //validate product
+                        
+
+                        //add product to database
+                    }
                     // 12) Edit record from Products
+                    else if(choice == "12"){
+                        //get product
+                        //get record to change
+                        //get and implement change
+                    }
                     // 13) Delete record from Products
+                    
 
 
 
@@ -205,5 +239,7 @@ namespace NorthwindConsole
 
             logger.Info("Program ended");
         }
+
+
     }
 }
