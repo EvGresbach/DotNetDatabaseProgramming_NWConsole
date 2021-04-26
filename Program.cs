@@ -101,6 +101,9 @@ namespace NorthwindConsole
 
                     }
                     //3) Edit record from Categories
+                    else if (choice == "3"){
+                        
+                    }
                     //4) Delete record from Categories
                     //5 Display specified category + all rel products
                     else if (choice == "5")
@@ -191,6 +194,7 @@ namespace NorthwindConsole
                     // 11) Add new record to Products
                     else if(choice == "11"){
                         //create product
+                        var db = new NWConsole_96_EXGContext();
                         Products product = new Products();
                         //get info
                         //add info to product
@@ -213,9 +217,26 @@ namespace NorthwindConsole
                         Console.WriteLine("Enter Discontinued: "); 
                         product.Discontinued = bool.Parse(Console.ReadLine());
                         //validate product
-                        
+                        ValidationContext context = new ValidationContext(product, null, null); 
+                        List<ValidationResult> results = new List<ValidationResult>(); 
 
-                        //add product to database
+                        var isValid = Validator.TryValidateObject(product, context, results);
+                        
+                        if(isValid){
+                            //ensure unqie name
+                            if(db.Products.Any(p => p.ProductName.Equals(product.ProductName))){
+                                isValid = false;
+                                results.Add(new ValidationResult("Product name exists", new string[] {"ProductName"})); 
+                            }
+                            //add product to database  
+                        }
+                        else{
+                            //print/log error message
+                            foreach(var result in results){
+                                logger.Error($"{result.MemberNames.FirstOrDefault()} : {result.ErrorMessage}");
+                            }
+                        }
+                         
                     }
                     // 12) Edit record from Products
                     else if(choice == "12"){
