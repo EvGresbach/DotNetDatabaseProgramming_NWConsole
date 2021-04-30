@@ -29,6 +29,8 @@ namespace NorthwindConsole
                     Console.Clear();
                     logger.Info($"Main Menu - Option {choice} selected");
                     
+                    var db = new NWConsole_96_EXGContext();
+
                     //Categories
                     if(choice == "1"){
                         Console.WriteLine("Category Menu\n1) Display\n2) Add Record\n3) Edit Record\n4) Delete Record");
@@ -46,7 +48,6 @@ namespace NorthwindConsole
                             //1 Display all Categories
                             if (choice == "1")
                             {
-                                var db = new NWConsole_96_EXGContext();
                                 var query = db.Categories.OrderBy(p => p.CategoryName);
 
                                 Console.ForegroundColor = ConsoleColor.Green;
@@ -62,7 +63,6 @@ namespace NorthwindConsole
                             //2 Display specified category + all rel products
                             else if (choice == "2")
                             {
-                                var db = new NWConsole_96_EXGContext();
                                 var query = db.Categories.OrderBy(p => p.CategoryId);
 
                                 Console.WriteLine("Select the category whose products you want to display:");
@@ -92,7 +92,6 @@ namespace NorthwindConsole
                             //4) display all categories + all related products
                             else if (choice == "4")
                             {
-                                var db = new NWConsole_96_EXGContext();
                                 var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
                                 foreach (var item in query)
                                 {
@@ -125,7 +124,6 @@ namespace NorthwindConsole
                             if (isValid)
                             {
                                 logger.Info("Validation passed");
-                                var db = new NWConsole_96_EXGContext();
                                 // check for unique name
                                 if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
                                 {
@@ -175,7 +173,6 @@ namespace NorthwindConsole
                             string userChoice = Console.ReadLine(); 
                             logger.Info($"Display Products - Option {userChoice} selected");
 
-                            var db = new NWConsole_96_EXGContext(); 
                             if(userChoice == "1"){
                                 //display all products
                                 var query = db.Products.OrderBy(p => p.ProductId);
@@ -209,7 +206,6 @@ namespace NorthwindConsole
                             Console.Write("Enter product name: ");
                             string productName = Console.ReadLine();
                             //display all fields
-                            var db = new NWConsole_96_EXGContext();
                             Products product = db.Products.FirstOrDefault(p => p.ProductName == productName);
 
                             Console.WriteLine("{0}:\nProduct ID: {1} \nSupplier ID: {2} \nCategory ID: {3}\nQuantity per Unit: {4}\nUnit Price: {5:n2}\nUnits in Stock: {6}\nUnits on Order: {7}\nReorder Level: {8}\nDiscontinued: {9}\n", 
@@ -219,7 +215,6 @@ namespace NorthwindConsole
                         // 3) Add new record to Products
                         else if(choice == "3"){
                             //create product
-                            var db = new NWConsole_96_EXGContext();
                             Products product = new Products();
                             //get info
                             //add info to product
@@ -310,24 +305,11 @@ namespace NorthwindConsole
                                 product.Discontinued = tempBool;
 
                             //validate product
-                            ValidationContext context = new ValidationContext(product, null, null); 
-                            List<ValidationResult> results = new List<ValidationResult>(); 
-
-                            var isValid = Validator.TryValidateObject(product, context, results);
-                            
-                            if(isValid){
-                                //ensure unqie name
-                                if(db.Products.Any(p => p.ProductName.Equals(product.ProductName))){
-                                    isValid = false;
-                                    results.Add(new ValidationResult("Product name exists", new string[] {"ProductName"})); 
-                                }
-                                //add product to database  
-                            }
-                            else{
-                                //print/log error message
-                                foreach(var result in results){
-                                    logger.Error($"{result.MemberNames.FirstOrDefault()} : {result.ErrorMessage}");
-                                }
+                            if(validateProduct(product)){
+                                //Add to db
+                                db.Products.Add(product);
+                                db.SaveChanges(); 
+                                logger.Info($"Product \"{product.ProductName}\" added");
                             }
                             
                         }
@@ -361,6 +343,29 @@ namespace NorthwindConsole
             logger.Info("Program ended");
         }
 
+        private static bool validateProduct(Products product){
+            var db = new NWConsole_96_EXGContext(); 
+            ValidationContext context = new ValidationContext(product, null, null); 
+            List<ValidationResult> results = new List<ValidationResult>(); 
+
+            var isValid = Validator.TryValidateObject(product, context, results);
+            
+            if(isValid){
+                //ensure unqie name
+                if(db.Products.Any(p => p.ProductName.Equals(product.ProductName))){
+                    isValid = false;
+                    results.Add(new ValidationResult("Product name exists", new string[] {"ProductName"})); 
+                }
+                //add product to database  
+            }
+            else{
+                //print/log error message
+                foreach(var result in results){
+                    logger.Error($"{result.MemberNames.FirstOrDefault()} : {result.ErrorMessage}");
+                }
+            }
+            return isValid; 
+        }
 
     }
 }
