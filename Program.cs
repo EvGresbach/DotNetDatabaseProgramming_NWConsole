@@ -167,7 +167,8 @@ namespace NorthwindConsole
 
                     //Products
                     else if(choice == "2"){
-                        Console.WriteLine("Product Menu\n1) Display Products \n2) Display Sepcific Product\n3) Edit Record\n4) Delete Record");
+                        Console.WriteLine("Product Menu\n1) Display Products \n2) Display Sepcific Product\n3) Add Record\n4) Edit Record\n5) Delete Record");
+                        choice = Console.ReadLine();
                         // 1) Display Products
                         if (choice == "1"){
                             Console.WriteLine("\nDisplay Products \n1) All Products \n2) Discontinued Products \n3) Active Products");
@@ -222,24 +223,92 @@ namespace NorthwindConsole
                             Products product = new Products();
                             //get info
                             //add info to product
+                            int tempInt;  
+                            short tempShort; 
+                            decimal tempDecimal; 
+                            bool tempBool; 
+                            string productInfo;  
                             Console.WriteLine("Enter Product Name: "); 
                             product.ProductName = Console.ReadLine();
+                            
                             Console.WriteLine("Enter Supplier ID: "); 
-                            product.SupplierId = Int32.Parse(Console.ReadLine());
+                            productInfo = Console.ReadLine();
+                            //allow nulls, stop if invalid int is entered
+                            if(!String.IsNullOrEmpty(productInfo)){
+                                if(!Int32.TryParse(productInfo, out tempInt)){
+                                    logger.Info("Supplier ID - Not a valid int");
+                                    break;
+                                }
+                                else
+                                    product.SupplierId = tempInt;
+                            }
+
                             Console.WriteLine("Enter Category ID: "); 
-                            product.CategoryId = Int32.Parse(Console.ReadLine());
+                            productInfo = Console.ReadLine();
+                            if(!String.IsNullOrEmpty(productInfo)){
+                                if(!Int32.TryParse(productInfo, out tempInt)){
+                                    logger.Info("Category ID - Not a valid int");
+                                    break;
+                                }
+                                else
+                                    product.CategoryId = tempInt;
+                            }
+                            
                             Console.WriteLine("Enter Quantity per Unit: "); 
                             product.QuantityPerUnit = Console.ReadLine();
+                            
                             Console.WriteLine("Enter Unit Price: "); 
-                            product.UnitPrice = Decimal.Parse(Console.ReadLine());
+                            productInfo = Console.ReadLine();
+                            if(!String.IsNullOrEmpty(productInfo)){
+                                if(!Decimal.TryParse(productInfo, out tempDecimal)){
+                                    logger.Info("Category ID - Not a valid decimal");
+                                    break;
+                                }
+                                else
+                                    product.UnitPrice = tempDecimal;
+                            }
                             Console.WriteLine("Enter Units in Stock: "); 
-                            product.UnitsInStock = short.Parse(Console.ReadLine());
+                            productInfo = Console.ReadLine();
+                            if(!String.IsNullOrEmpty(productInfo)){
+                                if(!short.TryParse(productInfo, out tempShort)){
+                                    logger.Info("Units in Stock - Not a valid short");
+                                    break;
+                                }
+                                else
+                                    product.UnitsInStock = tempShort;
+                            }
+                            
                             Console.WriteLine("Enter Units on Order: "); 
-                            product.UnitsOnOrder = short.Parse(Console.ReadLine());
+                            productInfo = Console.ReadLine();
+                            if(!String.IsNullOrEmpty(productInfo)){
+                                if(!short.TryParse(productInfo, out tempShort)){
+                                    logger.Info("Units on Order - Not a valid short");
+                                    break;
+                                }
+                                else
+                                    product.UnitsOnOrder = tempShort;
+                            }
+                            
                             Console.WriteLine("Enter Reorder Level: "); 
-                            product.ReorderLevel = short.Parse(Console.ReadLine());
+                            productInfo = Console.ReadLine();
+                            if(!String.IsNullOrEmpty(productInfo)){
+                                if(!short.TryParse(productInfo, out tempShort)){
+                                    logger.Info("Reorder Level - Not a valid short");
+                                    break;
+                                }
+                                else
+                                    product.ReorderLevel = tempShort;
+                            }
+                            
                             Console.WriteLine("Enter Discontinued: "); 
-                            product.Discontinued = bool.Parse(Console.ReadLine());
+                            productInfo = Console.ReadLine();
+                            if(!bool.TryParse(productInfo, out tempBool)){
+                                    logger.Info("Discontinued - Not a valid boolean");
+                                    break;
+                            }
+                            else
+                                product.Discontinued = tempBool;
+
                             //validate product
                             ValidationContext context = new ValidationContext(product, null, null); 
                             List<ValidationResult> results = new List<ValidationResult>(); 
