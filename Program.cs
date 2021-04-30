@@ -307,19 +307,34 @@ namespace NorthwindConsole
                             //validate product
                             if(validateProduct(product)){
                                 //Add to db
-                                db.Products.Add(product);
-                                db.SaveChanges(); 
-                                logger.Info($"Product \"{product.ProductName}\" added");
+                                try{
+                                    db.Products.Add(product);
+                                    db.SaveChanges(); 
+                                    logger.Info($"Product \"{product.ProductName}\" added");
+                                }catch(Exception e){
+                                    logger.Error(e.Message);
+                                }
                             }
-                            
                         }
                         // 4) Edit record from Products
                         else if(choice == "4"){
                             //display all products
+                            var allProducts = db.Products.OrderBy(p => p.ProductId);
+                            foreach(var product in allProducts){
+                                Console.WriteLine($"{product.ProductId}: {product.ProductName}"); 
+                            }
                             //find chosen product
+                            int productSearch; 
+                            Console.WriteLine("Enter ID of product to edit: ");
+                            if(Int32.TryParse(Console.ReadLine(), out productSearch)){
+                                Products product = db.Products.FirstOrDefault(p => p.ProductId == productSearch);
                             // get updated info
                             // validate
                             // save to db
+                            }
+                            else
+                                logger.Info("Not a valid int");
+                            
                         }
                         // 5) Delete record from Products
                         else if(choice == "5"){
