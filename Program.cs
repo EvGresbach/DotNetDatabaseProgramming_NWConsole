@@ -418,7 +418,12 @@ namespace NorthwindConsole
                                         break; 
                                 }
                                 // save to db
-                                
+                                try{
+                                    db.SaveChanges(); 
+                                    logger.Info($"Product {product.ProductId} edited");
+                                }catch(Exception e){
+                                    logger.Info(e.Message);
+                                }
                             }
                             else
                                 logger.Info("Not a valid int"); 
