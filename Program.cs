@@ -141,7 +141,7 @@ namespace NorthwindConsole
                                     Categories category = db.Categories.FirstOrDefault(c => c.CategoryId == catId);
                                     string userChoice;
                                     do{
-                                        Console.WriteLine("1) Category Name\n2) Category Description");
+                                        Console.WriteLine("1) Category Name\n2) Category Description\n\"x\" to quit");
                                         userChoice = Console.ReadLine();
 
                                         if(userChoice == "1"){
@@ -159,7 +159,7 @@ namespace NorthwindConsole
                                             category.Description = Console.ReadLine(); 
                                         }
                                         //get updated info 
-                                    }while(userChoice != "q");
+                                    }while(userChoice != "x");
                                     try{
                                        //save to db   
                                        db.SaveChanges(); 
@@ -178,11 +178,37 @@ namespace NorthwindConsole
                         //4) Delete record from Categories
                         else if (choice == "4"){
                             //display all categories 
-                            //find category chosen 
-                            //deal with orphans 
-                            // - find all affected records
-                            // - set category id to null
-                            //delete category 
+                            var query = db.Categories.OrderBy(p => p.CategoryId);
+                            foreach (var item in query)
+                            {
+                                Console.WriteLine($"{item.CategoryId} - {item.CategoryName}");
+                            }
+                            // find category chosen
+                            Console.Write("Enter category id to delete: ");
+                            string categorySearch = Console.ReadLine(); 
+                            int categoryDelete; 
+                            if(Int32.TryParse(categorySearch, out categoryDelete)){ 
+                                try{
+                                // deal with orphans
+                                //if products w/ category then find and replace w/ unknowncategory category
+                                    Categories category = db.Categories.FirstOrDefault(c => c.CategoryId == categoryDelete);
+                                    if(db.Products.Any(p => p.CategoryId == category.CategoryId)){
+                                        var productsToChange = db.Products.Where(p => p.CategoryId == category.CategoryId);
+                                        foreach(Products product in productsToChange){
+                                            product.CategoryId = 11; 
+                                        }
+                                        db.SaveChanges(); 
+                                    }
+                                // then delete category
+                                    db.Remove(category); 
+                                    db.SaveChanges(); 
+                                    logger.Info($"Category {category.CategoryId} deleted");
+                                }catch(Exception e){
+                                    logger.Error(e.Message);
+                                }
+                            }
+                            else 
+                                logger.Info("Category ID - invalid int");
                         }
                     }
 
@@ -379,7 +405,7 @@ namespace NorthwindConsole
                                     // get updated info
                                     string change = "";
                                     do{
-                                        Console.WriteLine("\n1) Product Name\n2) Supplier ID\n3) Category ID\n4) Quantity Per Unit\n5) Unit Price\n6) Units in Stock\n7) Units on Order\n8) Reorder Level\n9) Discontinuted\n\"q\" to quit");
+                                        Console.WriteLine("\n1) Product Name\n2) Supplier ID\n3) Category ID\n4) Quantity Per Unit\n5) Unit Price\n6) Units in Stock\n7) Units on Order\n8) Reorder Level\n9) Discontinuted\n\"x\" to quit");
                                         change = Console.ReadLine();
                                         logger.Info($"Edit Product Record - Option {change} selected");
 
@@ -423,7 +449,7 @@ namespace NorthwindConsole
                                                     logger.Info("Category ID - Not a valid int");
                                                     continue;
                                                 }
-                                                else if(!db.Products.Any(p => p.CategoryId == tempInt)){
+                                                else if(!db.Categories.Any(p => p.CategoryId == tempInt)){
                                                     logger.Info("Category ID - Invalid id");
                                                     continue;
                                                 }
@@ -485,7 +511,7 @@ namespace NorthwindConsole
                                                     product.Discontinued = tempBool;
                                                 break; 
                                         }
-                                    } while(change != "q");
+                                    } while(change != "x");
                                     // save to db
                                     try{
                                         db.SaveChanges(); 
