@@ -532,6 +532,11 @@ namespace NorthwindConsole
                                     }
                                 
                                 // else just delete 
+                                    else{
+                                        db.Remove(product);
+                                    }
+
+                                    db.SaveChanges(); 
                                 }catch(Exception e){
                                     logger.Error(e.Message);
                                 }
