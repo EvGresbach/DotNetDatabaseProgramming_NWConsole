@@ -503,11 +503,39 @@ namespace NorthwindConsole
                         // 5) Delete record from Products
                         else if(choice == "5"){
                             // display all products
+                            var allProducts = db.Products.OrderBy(p => p.ProductId);
+                            foreach(var product in allProducts){
+                                Console.WriteLine($"{product.ProductId}: {product.ProductName}"); 
+                            }
                             // find product chosen
-                            // deal with orphans 
-                            // - find affected records
-                            // - set all values to null
-                            // delete product
+                            Console.Write("Enter product id to delete: ");
+                            string productSearch = Console.ReadLine(); 
+                            int productDelete; 
+                            if(Int32.TryParse(productSearch, out productDelete)){ 
+
+                                try{
+                                // deal with orphans
+                                //if orders w/ product then 
+                                    Products product = db.Products.FirstOrDefault(p => p.ProductId == productDelete);
+                                    if(db.OrderDetails.Any(od => od.ProductId == product.ProductId)){
+                                    // - change name to 'Error Missing Product - Contanct Supplier' and discontinued to true
+                                        product.ProductName = "Error Missing Product - Contact Supplier"; 
+                                        product.Discontinued = true; 
+                                    // - set all other values to null
+                                        product.CategoryId = null; 
+                                        product.QuantityPerUnit = null; 
+                                        product.UnitPrice = null; 
+                                        product.UnitsInStock = null; 
+                                        product.UnitsOnOrder = null; 
+                                        product.ReorderLevel = null; 
+                                    // - hide from my lists so they can't edit it 
+                                    }
+                                
+                                // else just delete 
+                                }catch(Exception e){
+                                    logger.Error(e.Message);
+                                }
+                            }
 
                         }
                     }
