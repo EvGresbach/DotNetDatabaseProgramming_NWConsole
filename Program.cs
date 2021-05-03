@@ -24,7 +24,7 @@ namespace NorthwindConsole
                 {
 
                     Console.WriteLine("Main Menu\n"); 
-                    Console.WriteLine("1)Categories\n2)Products\n\"q\" to quit");
+                    Console.WriteLine("1) Categories\n2) Products\n\"q\" to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
                     logger.Info($"Main Menu - Option {choice} selected");
@@ -134,7 +134,7 @@ namespace NorthwindConsole
                                 else
                                 {
                                     logger.Info("Validation passed");
-                                    // TODO: save category to db
+                                    
                                 }
                             }
                             if (!isValid)
@@ -158,7 +158,9 @@ namespace NorthwindConsole
                         else if (choice == "4"){
                             //display all categories 
                             //find category chosen 
-                            //deal with orphans -- ??
+                            //deal with orphans 
+                            // - find all affected records
+                            // - set category id to null
                             //delete category 
                         }
                     }
@@ -202,15 +204,26 @@ namespace NorthwindConsole
                         }
                         // 2) Display specified Products
                         else if(choice == "2"){
+                            //display all products
+                            var query = db.Products.OrderBy(p => p.ProductId);
+                            foreach(var product in query){
+                                if(product.Discontinued)
+                                    Console.ForegroundColor = ConsoleColor.DarkRed; 
+                                else Console.ForegroundColor = ConsoleColor.White;
+                                Console.WriteLine($"{product.ProductName}");
+                            }
                             //Ask for Name
                             Console.Write("Enter product name: ");
                             string productName = Console.ReadLine();
                             //display all fields
-                            Products product = db.Products.FirstOrDefault(p => p.ProductName == productName);
-
-                            Console.WriteLine("{0}:\nProduct ID: {1} \nSupplier ID: {2} \nCategory ID: {3}\nQuantity per Unit: {4}\nUnit Price: {5:n2}\nUnits in Stock: {6}\nUnits on Order: {7}\nReorder Level: {8}\nDiscontinued: {9}\n", 
-                            product.ProductName, product.ProductId, product.SupplierId, product.CategoryId, product.QuantityPerUnit, product.UnitPrice, product.UnitsInStock,  
-                            product.UnitsOnOrder, product.ReorderLevel, product.Discontinued);
+                            try{
+                                Products product = db.Products.FirstOrDefault(p => p.ProductName == productName);
+                                Console.WriteLine("{0}:\nProduct ID: {1} \nSupplier ID: {2} \nCategory ID: {3}\nQuantity per Unit: {4}\nUnit Price: {5:n2}\nUnits in Stock: {6}\nUnits on Order: {7}\nReorder Level: {8}\nDiscontinued: {9}\n", 
+                                product.ProductName, product.ProductId, product.SupplierId, product.CategoryId, product.QuantityPerUnit, product.UnitPrice, product.UnitsInStock,  
+                                product.UnitsOnOrder, product.ReorderLevel, product.Discontinued);
+                            } catch(Exception e){
+                                logger.Info($"\"{productName}\" does not exist"); 
+                            }
                         }
                         // 3) Add new record to Products
                         else if(choice == "3"){
@@ -223,10 +236,15 @@ namespace NorthwindConsole
                             decimal tempDecimal; 
                             bool tempBool; 
                             string productInfo;  
-                            Console.WriteLine("Enter Product Name: "); 
-                            product.ProductName = Console.ReadLine();
-                            
-                            Console.WriteLine("Enter Supplier ID: "); 
+                            Console.Write("Enter Product Name: "); 
+                            productInfo = Console.ReadLine();
+                            if(!db.Products.Any(p => p.ProductName == productInfo))
+                                product.ProductName = productInfo;
+                            else {
+                                logger.Info($"\"{productInfo}\" already exists");
+                                continue;
+                            }
+                            Console.Write("Enter Supplier ID: "); 
                             productInfo = Console.ReadLine();
                             //allow nulls, stop if invalid int is entered
                             if(!String.IsNullOrEmpty(productInfo)){
@@ -234,25 +252,33 @@ namespace NorthwindConsole
                                     logger.Info("Supplier ID - Not a valid int");
                                     continue;
                                 }
+                                else if(!db.Products.Any(p => p.SupplierId == tempInt)){
+                                    logger.Info("Supplier ID - Invalid id");
+                                    continue;
+                                }
                                 else
                                     product.SupplierId = tempInt;
-                            }
+                            } 
 
-                            Console.WriteLine("Enter Category ID: "); 
+                            Console.Write("Enter Category ID: "); 
                             productInfo = Console.ReadLine();
                             if(!String.IsNullOrEmpty(productInfo)){
                                 if(!Int32.TryParse(productInfo, out tempInt)){
                                     logger.Info("Category ID - Not a valid int");
                                     continue;
                                 }
+                                else if(!db.Products.Any(p => p.CategoryId == tempInt)){
+                                    logger.Info("Category ID - Invalid id");
+                                    continue;
+                                }
                                 else
                                     product.CategoryId = tempInt;
                             }
                             
-                            Console.WriteLine("Enter Quantity per Unit: "); 
+                            Console.Write("Enter Quantity per Unit: "); 
                             product.QuantityPerUnit = Console.ReadLine();
                             
-                            Console.WriteLine("Enter Unit Price: "); 
+                            Console.Write("Enter Unit Price: "); 
                             productInfo = Console.ReadLine();
                             if(!String.IsNullOrEmpty(productInfo)){
                                 if(!Decimal.TryParse(productInfo, out tempDecimal)){
@@ -260,9 +286,9 @@ namespace NorthwindConsole
                                     continue;
                                 }
                                 else
-                                    product.UnitPrice = tempDecimal;
+                                    product.UnitPrice = Math.Round(tempDecimal, 2);
                             }
-                            Console.WriteLine("Enter Units in Stock: "); 
+                            Console.Write("Enter Units in Stock: "); 
                             productInfo = Console.ReadLine();
                             if(!String.IsNullOrEmpty(productInfo)){
                                 if(!short.TryParse(productInfo, out tempShort)){
@@ -273,7 +299,7 @@ namespace NorthwindConsole
                                     product.UnitsInStock = tempShort;
                             }
                             
-                            Console.WriteLine("Enter Units on Order: "); 
+                            Console.Write("Enter Units on Order: "); 
                             productInfo = Console.ReadLine();
                             if(!String.IsNullOrEmpty(productInfo)){
                                 if(!short.TryParse(productInfo, out tempShort)){
@@ -284,7 +310,7 @@ namespace NorthwindConsole
                                     product.UnitsOnOrder = tempShort;
                             }
                             
-                            Console.WriteLine("Enter Reorder Level: "); 
+                            Console.Write("Enter Reorder Level: "); 
                             productInfo = Console.ReadLine();
                             if(!String.IsNullOrEmpty(productInfo)){
                                 if(!short.TryParse(productInfo, out tempShort)){
@@ -295,7 +321,7 @@ namespace NorthwindConsole
                                     product.ReorderLevel = tempShort;
                             }
                             
-                            Console.WriteLine("Enter Discontinued: "); 
+                            Console.Write("Enter Discontinued: "); 
                             productInfo = Console.ReadLine();
                             if(!bool.TryParse(productInfo, out tempBool)){
                                     logger.Info("Discontinued - Not a valid boolean");
@@ -325,105 +351,130 @@ namespace NorthwindConsole
                             }
                             //find chosen product
                             int productSearch; 
-                            Console.WriteLine("Enter ID of product to edit: ");
+                            Console.Write("Enter ID of product to edit: ");
                             if(Int32.TryParse(Console.ReadLine(), out productSearch)){
-                                Products product = db.Products.FirstOrDefault(p => p.ProductId == productSearch);
-                                // get updated info
-                                Console.WriteLine("\n1) Product Name\n2) Supplier ID\n3) Category ID\n4) Quantity Per Unit\n5) Unit Price\n6) Units in Stock\n7)Units on Order\n8)Reorder Level\n9) Discontinuted");
-                                string change = Console.ReadLine();
-                                string productInfo;
-                                int tempInt;
-                                decimal tempDecimal;
-                                short tempShort; 
-                                bool tempBool; 
-                                switch(change){
-                                    case "1":
-                                        Console.WriteLine("Enter Product Name: "); 
-                                        product.ProductName = Console.ReadLine();
-                                        break;
-                                    case "2":
-                                        Console.WriteLine("Enter Supplier ID: "); 
-                                        productInfo = Console.ReadLine();
-                                        //allow nulls, stop if invalid int is entered
-                                        if(!Int32.TryParse(productInfo, out tempInt)){
-                                            logger.Info("Supplier ID - Not a valid int");
-                                            continue;
+                                if(db.Products.Any(p => p.ProductId == productSearch)){
+                                    Products product = db.Products.FirstOrDefault(p => p.ProductId == productSearch);
+                                    // get updated info
+                                    string change = "";
+                                    do{
+                                        Console.WriteLine("\n1) Product Name\n2) Supplier ID\n3) Category ID\n4) Quantity Per Unit\n5) Unit Price\n6) Units in Stock\n7) Units on Order\n8) Reorder Level\n9) Discontinuted\n\"q\" to quit");
+                                        change = Console.ReadLine();
+                                        logger.Info($"Edit Product Record - Option {change} selected");
+
+                                        string productInfo;
+                                        int tempInt;
+                                        decimal tempDecimal;
+                                        short tempShort; 
+                                        bool tempBool; 
+
+                                        
+                                        switch(change){
+                                            case "1":
+                                                Console.Write("Enter Product Name: "); 
+                                                productInfo = Console.ReadLine();
+                                                if(!db.Products.Any(p => p.ProductName == productInfo))
+                                                    product.ProductName = productInfo;
+                                                else {
+                                                    logger.Info($"\"{productInfo}\" already exists");
+                                                    continue;
+                                                }
+                                                break;
+                                            case "2":
+                                                Console.Write("Enter Supplier ID: "); 
+                                                productInfo = Console.ReadLine();
+                                                //allow nulls, stop if invalid int is entered
+                                                if(!Int32.TryParse(productInfo, out tempInt)){
+                                                    logger.Info("Supplier ID - Not a valid int");
+                                                    continue;
+                                                }
+                                                else if(!db.Products.Any(p => p.SupplierId == tempInt)){
+                                                    logger.Info("Supplier ID - Invalid id");
+                                                    continue;
+                                                }
+                                                else
+                                                    product.SupplierId = tempInt;
+                                                break;
+                                            case "3":
+                                                Console.Write("Enter Category ID: "); 
+                                                productInfo = Console.ReadLine();
+                                                if(!Int32.TryParse(productInfo, out tempInt)){
+                                                    logger.Info("Category ID - Not a valid int");
+                                                    continue;
+                                                }
+                                                else if(!db.Products.Any(p => p.CategoryId == tempInt)){
+                                                    logger.Info("Category ID - Invalid id");
+                                                    continue;
+                                                }
+                                                else
+                                                    product.CategoryId = tempInt;
+                                                break;
+                                            case "4":
+                                                Console.Write("Enter Quantity per Unit: "); 
+                                                product.QuantityPerUnit = Console.ReadLine();
+                                                break;
+                                            case "5":
+                                                Console.Write("Enter Unit Price: "); 
+                                                productInfo = Console.ReadLine();
+                                                if(!Decimal.TryParse(productInfo, out tempDecimal)){
+                                                    logger.Info("Category ID - Not a valid decimal");
+                                                    continue;
+                                                }
+                                                else
+                                                    product.UnitPrice = Math.Round(tempDecimal, 2);
+                                                break;
+                                            case "6":
+                                                Console.Write("Enter Units in Stock: "); 
+                                                productInfo = Console.ReadLine();
+                                                if(!short.TryParse(productInfo, out tempShort)){
+                                                    logger.Info("Units in Stock - Not a valid short");
+                                                    continue;
+                                                }
+                                                else
+                                                    product.UnitsInStock = tempShort;
+                                                break;
+                                            case "7":
+                                                Console.Write("Enter Units on Order: "); 
+                                                productInfo = Console.ReadLine();
+                                                if(!short.TryParse(productInfo, out tempShort)){
+                                                    logger.Info("Units on Order - Not a valid short");
+                                                    continue;
+                                                }
+                                                else
+                                                    product.UnitsOnOrder = tempShort;
+                                                break;
+                                            case "8":
+                                                Console.Write("Enter Reorder Level: "); 
+                                                productInfo = Console.ReadLine();
+                                                if(!short.TryParse(productInfo, out tempShort)){
+                                                    logger.Info("Reorder Level - Not a valid short");
+                                                    continue;
+                                                }
+                                                else
+                                                    product.ReorderLevel = tempShort;
+                                                break;
+                                            case "9":
+                                                Console.Write("Enter Discontinued: "); 
+                                                productInfo = Console.ReadLine();
+                                                if(!bool.TryParse(productInfo, out tempBool)){
+                                                        logger.Info("Discontinued - Not a valid boolean");
+                                                        continue;
+                                                }
+                                                else
+                                                    product.Discontinued = tempBool;
+                                                break; 
                                         }
-                                        else
-                                            product.SupplierId = tempInt;
-                                        break;
-                                    case "3":
-                                    Console.WriteLine("Enter Category ID: "); 
-                                    productInfo = Console.ReadLine();
-                                        if(!Int32.TryParse(productInfo, out tempInt)){
-                                            logger.Info("Category ID - Not a valid int");
-                                            continue;
-                                        }
-                                        else
-                                            product.CategoryId = tempInt;
-                                        break;
-                                    case "4":
-                                        Console.WriteLine("Enter Quantity per Unit: "); 
-                                        product.QuantityPerUnit = Console.ReadLine();
-                                        break;
-                                    case "5":
-                                        Console.WriteLine("Enter Unit Price: "); 
-                                        productInfo = Console.ReadLine();
-                                        if(!Decimal.TryParse(productInfo, out tempDecimal)){
-                                            logger.Info("Category ID - Not a valid decimal");
-                                            continue;
-                                        }
-                                        else
-                                            product.UnitPrice = tempDecimal;
-                                        break;
-                                    case "6":
-                                        Console.WriteLine("Enter Units in Stock: "); 
-                                        productInfo = Console.ReadLine();
-                                        if(!short.TryParse(productInfo, out tempShort)){
-                                            logger.Info("Units in Stock - Not a valid short");
-                                            continue;
-                                        }
-                                        else
-                                            product.UnitsInStock = tempShort;
-                                        break;
-                                    case "7":
-                                        Console.WriteLine("Enter Units on Order: "); 
-                                        productInfo = Console.ReadLine();
-                                        if(!short.TryParse(productInfo, out tempShort)){
-                                            logger.Info("Units on Order - Not a valid short");
-                                            continue;
-                                        }
-                                        else
-                                            product.UnitsOnOrder = tempShort;
-                                        break;
-                                    case "8":
-                                        Console.WriteLine("Enter Reorder Level: "); 
-                                        productInfo = Console.ReadLine();
-                                        if(!short.TryParse(productInfo, out tempShort)){
-                                            logger.Info("Reorder Level - Not a valid short");
-                                            continue;
-                                        }
-                                        else
-                                            product.ReorderLevel = tempShort;
-                                        break;
-                                    case "9":
-                                        Console.WriteLine("Enter Discontinued: "); 
-                                        productInfo = Console.ReadLine();
-                                        if(!bool.TryParse(productInfo, out tempBool)){
-                                                logger.Info("Discontinued - Not a valid boolean");
-                                                continue;
-                                        }
-                                        else
-                                            product.Discontinued = tempBool;
-                                        break; 
+                                    } while(change != "q");
+                                    // save to db
+                                    try{
+                                        db.SaveChanges(); 
+                                        logger.Info($"Product {product.ProductId} edited");
+                                    }catch(Exception e){
+                                        logger.Info(e.Message);
+                                    }
                                 }
-                                // save to db
-                                try{
-                                    db.SaveChanges(); 
-                                    logger.Info($"Product {product.ProductId} edited");
-                                }catch(Exception e){
-                                    logger.Info(e.Message);
-                                }
+                                else
+                                    logger.Info($"Product ID {productSearch} does not exit");
                             }
                             else
                                 logger.Info("Not a valid int"); 
@@ -432,7 +483,9 @@ namespace NorthwindConsole
                         else if(choice == "5"){
                             // display all products
                             // find product chosen
-                            // deal with orpahns -- ??
+                            // deal with orphans 
+                            // - find affected records
+                            // - set all values to null
                             // delete product
 
                         }
@@ -463,7 +516,6 @@ namespace NorthwindConsole
                     isValid = false;
                     results.Add(new ValidationResult("Product name exists", new string[] {"ProductName"})); 
                 }
-                //add product to database  
             }
             else{
                 //print/log error message
