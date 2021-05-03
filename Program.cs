@@ -40,8 +40,8 @@ namespace NorthwindConsole
                         
                         if(choice == "1"){
                             Console.WriteLine("Display Menu\n1) All Categories");
-                            Console.WriteLine("2) Specific Category - All Related PRoducts\n3) Specific Category - Active Products");
-                            Console.WriteLine("4) All Cateories - All Related Products\n5) All Categories - Active Products");
+                            Console.WriteLine("2) Specific Category - Active Products");
+                            Console.WriteLine("3) All Categories - Active Products");
                             choice = Console.ReadLine();
                             Console.Clear();
                             logger.Info($"Category Display Menu - Option {choice} selected");
@@ -60,52 +60,49 @@ namespace NorthwindConsole
                                 Console.ForegroundColor = ConsoleColor.White;
                             }
 
-                            //2 Display specified category + all rel products
-                            else if (choice == "2")
-                            {
-                                var query = db.Categories.OrderBy(p => p.CategoryId);
-
-                                Console.WriteLine("Select the category whose products you want to display:");
-                                Console.ForegroundColor = ConsoleColor.DarkRed;
+                            //2) Display specified Category and active products
+                            else if (choice == "2"){
+                                // get category
+                                var query = db.Categories.OrderBy(c => c.CategoryId);
                                 foreach (var item in query)
                                 {
                                     Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
                                 }
-                                Console.ForegroundColor = ConsoleColor.White;
-                                int id = int.Parse(Console.ReadLine());
-                                Console.Clear();
-                                logger.Info($"CategoryId {id} selected");
-                                Categories category = db.Categories.Include("Products").FirstOrDefault(c => c.CategoryId == id);
-                                Console.WriteLine($"{category.CategoryName} - {category.Description}");
-                                foreach (Products p in category.Products)
-                                {
-                                    Console.WriteLine(p.ProductName);
-                                }
-                            }
-                            //3) Display specified Category and active products
-                            else if (choice == "3"){
-                                // get category
-                                // find all active product
-                                // display category and active products
-                                // log
-                            }
-                            //4) display all categories + all related products
-                            else if (choice == "4")
-                            {
-                                var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
-                                foreach (var item in query)
-                                {
-                                    Console.WriteLine($"{item.CategoryName}");
-                                    foreach (Products p in item.Products)
-                                    {
-                                        Console.WriteLine($"\t{p.ProductName}");
+                                Console.Write("Enter Category Id: "); 
+                                string categorySearch = Console.ReadLine(); 
+                                int catId; 
+                                //if valid id 
+                                if(Int32.TryParse(categorySearch, out catId)){
+                                    try{
+                                        Categories category = db.Categories.FirstOrDefault(c => c.CategoryId == catId);
+                                        // find all active product
+                                        var active = category.Products.Where(p => p.Discontinued == false);
+                                        // display category and active products
+                                        logger.Info($"Category {category.CategoryId}: {active.Count()} Active Products");
+                                        foreach(Products products in active){
+                                            Console.WriteLine($"{products.ProductName}");
+                                        }
+                                    }catch(Exception e){
+                                        logger.Error(e.Message); 
                                     }
+                                    
                                 }
+                                else logger.Info("Category ID - Not a valid int");
+                                    
                             }
-                            // 5) Display all Categories and active products
-                            else if(choice == "5"){
-                                //display category
-                                //find and display active products
+                            //3) Display all Categories and active products
+                            else if(choice == "3"){
+                                try{
+                                    //display category
+                                    foreach(Categories category in db.Categories){
+                                        //find and display active products
+                                        var active = category.Products.Where(p => p.Discontinued == false); 
+                                        logger.Info($"Category {category.CategoryId}: {active.Count()} Active Products");
+                                            foreach(Products products in active){
+                                                Console.WriteLine($"{products.ProductName}");
+                                            }
+                                    }
+                                }catch(Exception e){logger.Error(e.Message);}
                             }
                         }
                         //2 Add record to category
@@ -117,42 +114,66 @@ namespace NorthwindConsole
                             Console.WriteLine("Enter the Category Description:");
                             category.Description = Console.ReadLine();
                             
-                            ValidationContext context = new ValidationContext(category, null, null);
-                            List<ValidationResult> results = new List<ValidationResult>();
-
-                            var isValid = Validator.TryValidateObject(category, context, results, true);
-                            if (isValid)
-                            {
-                                logger.Info("Validation passed");
-                                // check for unique name
-                                if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
-                                {
-                                    // generate validation error
-                                    isValid = false;
-                                    results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
-                                }
-                                else
-                                {
-                                    logger.Info("Validation passed");
-                                    
-                                }
+                            //validate 
+                            if(isValidCategory(category)){
+                                //save to db
+                                db.Categories.Add(category);
+                                db.SaveChanges();
+                                logger.Info($"Category \"{category.CategoryName}\" added");
                             }
-                            if (!isValid)
-                            {
-                                foreach (var result in results)
-                                {
-                                    logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
-                                }
-                            }
-
+                            
                         }
                         //3) Edit record from Categories
                         else if (choice == "3"){
                             //display all categories 
+                            var query = db.Categories.OrderBy(p => p.CategoryName);
+                            
+                            foreach (var item in query)
+                            {
+                                Console.WriteLine($"{item.CategoryId} - {item.CategoryName}");
+                            }
                             //find category chosen 
-                            //get updated info 
-                            //validate
-                            //save to db 
+                            Console.Write("Enter Categry id to edit: ");
+                            string categorySearch = Console.ReadLine(); 
+                            int catId; 
+                            if(Int32.TryParse(categorySearch, out catId)){
+                                try{
+                                    Categories category = db.Categories.FirstOrDefault(c => c.CategoryId == catId);
+                                    string userChoice;
+                                    do{
+                                        Console.WriteLine("1) Category Name\n2) Category Description");
+                                        userChoice = Console.ReadLine();
+
+                                        if(userChoice == "1"){
+                                            Console.Write("Enter category name: ");
+                                            string name = Console.ReadLine();
+                                            if(!db.Categories.Any(c => c.CategoryName == name))
+                                                category.CategoryName = name;
+                                            else {
+                                                logger.Info($"\"{name}\" already exists");
+                                                continue;
+                                            }
+                                        }
+                                        else if(userChoice == "2"){
+                                            Console.Write("Enter description: ");
+                                            category.Description = Console.ReadLine(); 
+                                        }
+                                        //get updated info 
+                                    }while(userChoice != "q");
+                                    try{
+                                       //save to db   
+                                       db.SaveChanges(); 
+                                       logger.Info($"Category {category.CategoryId} edited");
+                                    }catch(Exception e){
+                                        logger.Error(e.Message); 
+                                    }
+                                      
+                                } catch(Exception e){
+                                    logger.Error(e.Message);
+                                }
+                                    
+                            }
+                            
                         }
                         //4) Delete record from Categories
                         else if (choice == "4"){
@@ -331,7 +352,7 @@ namespace NorthwindConsole
                                 product.Discontinued = tempBool;
 
                             //validate product
-                            if(validateProduct(product)){
+                            if(isValidProduct(product)){
                                 //Add to db
                                 try{
                                     db.Products.Add(product);
@@ -503,7 +524,7 @@ namespace NorthwindConsole
             logger.Info("Program ended");
         }
 
-        private static bool validateProduct(Products product){
+        private static bool isValidProduct(Products product){
             var db = new NWConsole_96_EXGContext(); 
             ValidationContext context = new ValidationContext(product, null, null); 
             List<ValidationResult> results = new List<ValidationResult>(); 
@@ -524,6 +545,38 @@ namespace NorthwindConsole
                 }
             }
             return isValid; 
+        }
+
+        private static bool isValidCategory(Categories category){
+            var db = new NWConsole_96_EXGContext();
+            ValidationContext context = new ValidationContext(category, null, null);
+            List<ValidationResult> results = new List<ValidationResult>();
+
+            var isValid = Validator.TryValidateObject(category, context, results, true);
+            if (isValid)
+            {
+                logger.Info("Validation passed");
+                // check for unique name
+                if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+                {
+                    // generate validation error
+                    isValid = false;
+                    results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
+                }
+                else
+                {
+                    logger.Info("Validation passed");
+                    
+                }
+            }
+            if (!isValid)
+            {
+                foreach (var result in results)
+                {
+                    logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
+                }
+            }
+            return isValid;
         }
 
     }
