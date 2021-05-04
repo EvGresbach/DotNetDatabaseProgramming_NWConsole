@@ -78,10 +78,10 @@ namespace NorthwindConsole
                                     try{
                                         Categories category = db.Categories.FirstOrDefault(c => c.CategoryId == catId);
                                         // find all active product
-                                        var active = category.Products.Where(p => p.Discontinued == false);
+                                        var active = db.Products.Where(p => p.Discontinued == false && p.CategoryId == category.CategoryId).OrderBy(p => p.ProductName);
                                         // display category and active products
-                                        logger.Info($"Category {category.CategoryId}: {active.Count()} Active Products");
-                                        foreach(Products products in active){
+                                        Console.WriteLine($"{active.Count()} records returned");
+                                        foreach(var products in active){
                                             Console.WriteLine($"{products.ProductName}");
                                         }
                                     }catch(Exception e){
@@ -99,8 +99,8 @@ namespace NorthwindConsole
                                     foreach(Categories category in db.Categories){
                                         if(category.CategoryId != 11){
                                             //find and display active products
-                                            var active = category.Products.Where(p => p.Discontinued == false); 
-                                            logger.Info($"Category {category.CategoryId}: {active.Count()} Active Products");
+                                        var active = db.Products.Where(p => p.Discontinued == false && p.CategoryId == category.CategoryId).OrderBy(p => p.ProductName);
+                                            Console.WriteLine($"{active.Count()} records returned");
                                                 foreach(Products products in active){
                                                     Console.WriteLine($"{products.ProductName}");
                                                 }
@@ -113,9 +113,9 @@ namespace NorthwindConsole
                         else if (choice == "2")
                         {
                             Categories category = new Categories();
-                            Console.WriteLine("Enter Category Name:");
+                            Console.Write("Enter Category Name:");
                             category.CategoryName = Console.ReadLine();
-                            Console.WriteLine("Enter the Category Description:");
+                            Console.Write("Enter the Category Description:");
                             category.Description = Console.ReadLine();
                             
                             //validate 
@@ -231,16 +231,19 @@ namespace NorthwindConsole
                             if(userChoice == "1"){
                                 //display all products
                                 var query = db.Products.Where(p => p.ProductName != "Error Missing Product - Contact Supplier").OrderBy(p => p.ProductId);
+                                Console.WriteLine($"{query.Count()} records returned");
                                 foreach(var product in query){
                                     if(product.Discontinued)
                                         Console.ForegroundColor = ConsoleColor.DarkRed; 
                                     else Console.ForegroundColor = ConsoleColor.White;
                                     Console.WriteLine($"{product.ProductName}");
                                 }
+                                Console.ForegroundColor = ConsoleColor.White; 
                             }
                             else if(userChoice == "2"){
                                 //display all discontinued
                                 var query = db.Products.Where(p => p.Discontinued == true && p.ProductName != "Error Missing Product - Contact Supplier").OrderBy(p => p.ProductId); 
+                                Console.WriteLine($"{query.Count()} records returned");
                                 Console.ForegroundColor = ConsoleColor.DarkRed;
                                 foreach(var product in query){
                                     Console.WriteLine($"{product.ProductName}");
@@ -250,6 +253,7 @@ namespace NorthwindConsole
                             else if(userChoice == "3"){
                                 //display all active
                                 var query = db.Products.Where(p => p.Discontinued == false && p.ProductName != "Error Missing Product - Contact Supplier").OrderBy(p => p.ProductId); 
+                                Console.WriteLine($"{query.Count()} records returned");
                                 foreach(var product in query){
                                     Console.WriteLine($"{product.ProductName}");
                                 } 
@@ -259,6 +263,7 @@ namespace NorthwindConsole
                         else if(choice == "2"){
                             //display all products
                             var query = db.Products.Where(p => p.ProductName != "Error Missing Product - Contact Supplier").OrderBy(p => p.ProductId);
+                            Console.WriteLine($"{query.Count()} records returned");
                             foreach(var product in query){
                                 if(product.Discontinued)
                                     Console.ForegroundColor = ConsoleColor.DarkRed; 
@@ -266,17 +271,20 @@ namespace NorthwindConsole
                                 Console.WriteLine($"{product.ProductName}");
                             }
                             //Ask for Name
-                            Console.Write("Enter product name: ");
-                            string productName = Console.ReadLine();
+                            Console.Write("Enter product ID: ");
+                            string productID = Console.ReadLine();
+                            int id; 
                             //display all fields
-                            try{
-                                Products product = db.Products.FirstOrDefault(p => p.ProductName == productName);
-                                Console.WriteLine("{0}:\nProduct ID: {1} \nSupplier ID: {2} \nCategory ID: {3}\nQuantity per Unit: {4}\nUnit Price: {5:n2}\nUnits in Stock: {6}\nUnits on Order: {7}\nReorder Level: {8}\nDiscontinued: {9}\n", 
-                                product.ProductName, product.ProductId, product.SupplierId, product.CategoryId, product.QuantityPerUnit, product.UnitPrice, product.UnitsInStock,  
-                                product.UnitsOnOrder, product.ReorderLevel, product.Discontinued);
-                            } catch(Exception e){
-                                logger.Info(e.Message); 
-                            }
+                            if(Int32.TryParse(productID, out id)){
+                                try{
+                                    Products product = db.Products.FirstOrDefault(p => p.ProductId == id);
+                                    Console.WriteLine("{0}:\nProduct ID: {1} \nSupplier ID: {2} \nCategory ID: {3}\nQuantity per Unit: {4}\nUnit Price: {5:n2}\nUnits in Stock: {6}\nUnits on Order: {7}\nReorder Level: {8}\nDiscontinued: {9}\n", 
+                                    product.ProductName, product.ProductId, product.SupplierId, product.CategoryId, product.QuantityPerUnit, product.UnitPrice, product.UnitsInStock,  
+                                    product.UnitsOnOrder, product.ReorderLevel, product.Discontinued);
+                                } catch(Exception e){
+                                    logger.Info(e.Message); 
+                                }
+                            } else logger.Error("Product ID - Not a valid int");
                         }
                         // 3) Add new record to Products
                         else if(choice == "3"){
