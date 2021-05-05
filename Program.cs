@@ -593,6 +593,31 @@ namespace NorthwindConsole
                             foreach(Products product in query1){
                                 Console.WriteLine(product.ProductName); 
                             }
+                            // create list 2
+                            Console.Write("Do you wish to create a second list (Y/N): "); 
+                            string second = Console.ReadLine(); 
+                            if(second.Equals("y", StringComparison.OrdinalIgnoreCase)){
+                                List<Products> query2 = getFilteredProducts(); 
+                                foreach(Products product in query2){
+                                    Console.WriteLine(product.ProductName); 
+                                }
+                                //ask for union, intersection, or except
+                                List<Products> comparison = new List<Products>(); 
+                                Console.WriteLine("1) Union\n2) Interction\n3) Except (List 1 except list 2)"); 
+                                string compare = Console.ReadLine(); 
+                                if(compare == "1")
+                                    comparison = query1.Union(query2).Distinct().ToList();
+                                else if (compare == "2")
+                                    comparison = query1.Intersect(query2).Distinct().ToList(); 
+                                else if (compare == "3")
+                                    comparison = query1.Except(query2).Distinct().ToList(); 
+
+                                foreach(Products product in comparison){
+                                    Console.WriteLine(product.ProductName); 
+                                }
+                                
+                            }
+
                             
                         }
                     }
