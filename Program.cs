@@ -220,7 +220,7 @@ namespace NorthwindConsole
 
                     //Products
                     else if(choice == "2"){
-                        Console.WriteLine("Product Menu\n1) Display Products \n2) Display Sepcific Product\n3) Add Record\n4) Edit Record\n5) Delete Record");
+                        Console.WriteLine("Product Menu\n1) Display Products \n2) Display Sepcific Product\n3) Add Record\n4) Edit Record\n5) Delete Record\n6) Filter Records");
                         choice = Console.ReadLine();
                         // 1) Display Products
                         if (choice == "1"){
@@ -587,6 +587,14 @@ namespace NorthwindConsole
                             }
 
                         }
+                        else if(choice == "6"){
+                            // create list 1
+                            List<Products> query1 = getFilteredProducts(); 
+                            foreach(Products product in query1){
+                                Console.WriteLine(product.ProductName); 
+                            }
+                            
+                        }
                     }
 
                     Console.WriteLine();
@@ -601,6 +609,88 @@ namespace NorthwindConsole
             logger.Info("Program ended");
         }
 
+        private static List<Products> getFilteredProducts(){
+            var db = new NWConsole_96_EXGContext();
+            Console.WriteLine("Filter by: \n1)ID \n2)Name \n3) Supplier ID\n4) Category ID\n5) Quantity per Unit\n6) Unit Price\n7) Units in Stock\n8) Units on Order\n9) Reorder Level\n10) Discontinued");
+            //ask what to filter by
+            string filterBy = Console.ReadLine(); 
+
+            List<Products> products = new List<Products>(); 
+            //ask for min and max || contains
+            int intMin; 
+            int intMax;
+            short shortMin; 
+            short shortMax; 
+            string text; 
+            switch(filterBy){
+                case "1": 
+                    Console.Write("Enter min (0 or above): "); 
+                    intMin = Int32.Parse(Console.ReadLine()); 
+                    Console.Write("Enter max (0 or above): ");
+                    intMax = Int32.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.ProductId >= intMin && p.ProductId <= intMax).ToList();
+                    break; 
+                case "2": 
+                    Console.Write("Enter text to search for: "); 
+                    text = Console.ReadLine();
+                    products = db.Products.Where(p => p.ProductName.Contains(text)).ToList();
+                    break; 
+                case "3": 
+                    Console.Write("Enter min (0 or above): "); 
+                    intMin = Int32.Parse(Console.ReadLine()); 
+                    Console.Write("Enter max (0 or above): ");
+                    intMax = Int32.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.SupplierId >= intMin && p.SupplierId <= intMax).ToList();
+                    break; 
+                case "4": 
+                    Console.Write("Enter min (0 or above): "); 
+                    intMin = Int32.Parse(Console.ReadLine()); 
+                    Console.Write("Enter max (0 or above): ");
+                    intMax = Int32.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.CategoryId >= intMin && p.CategoryId <= intMax).ToList();
+                    break; 
+                case "5": 
+                    Console.Write("Enter text to search for: "); 
+                    text = Console.ReadLine(); 
+                    products = db.Products.Where(p => p.QuantityPerUnit.Contains(text)).ToList();
+                    break; 
+                case "6": 
+                    Console.Write("Enter min (0 or above): "); 
+                    decimal decimalMin = decimal.Parse(Console.ReadLine()); 
+                    Console.Write("Enter max (0 or above): ");
+                    decimal decimalMax = decimal.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.UnitPrice >= decimalMin && p.UnitPrice <= decimalMax).ToList();
+                    break; 
+                case "7": 
+                    Console.Write("Enter min (0 or above): "); 
+                    shortMin = short.Parse(Console.ReadLine()); 
+                    Console.Write("Enter max (0 or above): ");
+                    shortMax = short.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.UnitsInStock >= shortMin && p.UnitsInStock <= shortMax).ToList();
+                    break; 
+                case "8": 
+                    Console.Write("Enter min (0 or above): "); 
+                    shortMin = short.Parse(Console.ReadLine()); 
+                    Console.Write("Enter max (0 or above): ");
+                    shortMax = short.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.UnitsOnOrder >= shortMin && p.UnitsOnOrder <= shortMax).ToList();
+                    break; 
+                case "9": 
+                    Console.Write("Enter min (0 or above): "); 
+                    shortMin = short.Parse(Console.ReadLine()); 
+                    Console.Write("Enter max (0 or above): ");
+                    shortMax = short.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.ReorderLevel >= shortMin && p.ReorderLevel <= shortMax).ToList();
+                    break; 
+                case "10": 
+                    Console.Write("Enter discontinued (true/false): "); 
+                    bool discont = bool.Parse(Console.ReadLine()); 
+                    products = db.Products.Where(p => p.Discontinued == discont).ToList(); 
+                    break;
+            }
+
+            return products; 
+        }
         private static bool isValidProduct(Products product){
             var db = new NWConsole_96_EXGContext(); 
             ValidationContext context = new ValidationContext(product, null, null); 
