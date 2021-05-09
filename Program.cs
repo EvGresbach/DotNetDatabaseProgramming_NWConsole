@@ -650,10 +650,15 @@ namespace NorthwindConsole
             switch(filterBy){
                 case "1": 
                     Console.Write("Enter min (0 or above): "); 
-                    intMin = Int32.Parse(Console.ReadLine()); 
-                    Console.Write("Enter max (0 or above): ");
-                    intMax = Int32.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.ProductId >= intMin && p.ProductId <= intMax).ToList();
+                    if(!Int32.TryParse(Console.ReadLine(), out intMin))
+                        logger.Error("Invalid Int"); 
+                    else{
+                        Console.Write("Enter max (0 or above): ");
+                        if(!Int32.TryParse(Console.ReadLine(), out intMax))
+                            logger.Error("Invalid int") ;
+                        else
+                            products = db.Products.Where(p => p.ProductId >= intMin && p.ProductId <= intMax).ToList();
+                    }
                     break; 
                 case "2": 
                     Console.Write("Enter text to search for: "); 
@@ -662,17 +667,27 @@ namespace NorthwindConsole
                     break; 
                 case "3": 
                     Console.Write("Enter min (0 or above): "); 
-                    intMin = Int32.Parse(Console.ReadLine()); 
-                    Console.Write("Enter max (0 or above): ");
-                    intMax = Int32.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.SupplierId >= intMin && p.SupplierId <= intMax).ToList();
+                    if(!Int32.TryParse(Console.ReadLine(), out intMin))
+                        logger.Error("Invalid Int"); 
+                    else{
+                        Console.Write("Enter max (0 or above): ");
+                        if(!Int32.TryParse(Console.ReadLine(), out intMax))
+                            logger.Error("Invalid int") ;
+                        else
+                            products = db.Products.Where(p => p.SupplierId >= intMin && p.SupplierId <= intMax).ToList();
+                    }
                     break; 
                 case "4": 
                     Console.Write("Enter min (0 or above): "); 
-                    intMin = Int32.Parse(Console.ReadLine()); 
-                    Console.Write("Enter max (0 or above): ");
-                    intMax = Int32.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.CategoryId >= intMin && p.CategoryId <= intMax).ToList();
+                    if(!Int32.TryParse(Console.ReadLine(), out intMin))
+                        logger.Error("Invalid Int"); 
+                    else{
+                        Console.Write("Enter max (0 or above): ");
+                        if(!Int32.TryParse(Console.ReadLine(), out intMax))
+                            logger.Error("Invalid int") ;
+                        else
+                            products = db.Products.Where(p => p.CategoryId >= intMin && p.CategoryId <= intMax).ToList();
+                    }
                     break; 
                 case "5": 
                     Console.Write("Enter text to search for: "); 
@@ -680,37 +695,62 @@ namespace NorthwindConsole
                     products = db.Products.Where(p => p.QuantityPerUnit.Contains(text)).ToList();
                     break; 
                 case "6": 
+                    decimal decimalMin; 
+                    decimal decimalMax; 
                     Console.Write("Enter min (0 or above): "); 
-                    decimal decimalMin = decimal.Parse(Console.ReadLine()); 
-                    Console.Write("Enter max (0 or above): ");
-                    decimal decimalMax = decimal.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.UnitPrice >= decimalMin && p.UnitPrice <= decimalMax).ToList();
+                    if(!decimal.TryParse(Console.ReadLine(), out decimalMin))
+                        logger.Error("Invalid Int"); 
+                    else{
+                        Console.Write("Enter max (0 or above): ");
+                        if(!decimal.TryParse(Console.ReadLine(), out decimalMax))
+                            logger.Error("Invalid int") ;
+                        else
+                            products = db.Products.Where(p => p.UnitPrice >= decimalMin && p.UnitPrice <= decimalMax).ToList();
+                    }
                     break; 
                 case "7": 
                     Console.Write("Enter min (0 or above): "); 
-                    shortMin = short.Parse(Console.ReadLine()); 
-                    Console.Write("Enter max (0 or above): ");
-                    shortMax = short.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.UnitsInStock >= shortMin && p.UnitsInStock <= shortMax).ToList();
+                    if(!short.TryParse(Console.ReadLine(), out shortMin))
+                        logger.Error("Invalid Int"); 
+                    else{
+                        Console.Write("Enter max (0 or above): ");
+                        if(!short.TryParse(Console.ReadLine(), out shortMax))
+                            logger.Error("Invalid int") ;
+                        else
+                            products = db.Products.Where(p => p.UnitsInStock >= shortMin && p.UnitsInStock <= shortMax).ToList();
+                    }
                     break; 
                 case "8": 
                     Console.Write("Enter min (0 or above): "); 
-                    shortMin = short.Parse(Console.ReadLine()); 
-                    Console.Write("Enter max (0 or above): ");
-                    shortMax = short.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.UnitsOnOrder >= shortMin && p.UnitsOnOrder <= shortMax).ToList();
+                    if(!short.TryParse(Console.ReadLine(), out shortMin))
+                        logger.Error("Invalid Int"); 
+                    else{
+                        Console.Write("Enter max (0 or above): ");
+                        if(!short.TryParse(Console.ReadLine(), out shortMax))
+                            logger.Error("Invalid int") ;
+                        else
+                            products = db.Products.Where(p => p.UnitsOnOrder >= shortMin && p.UnitsOnOrder <= shortMax).ToList();
+                    }
                     break; 
                 case "9": 
                     Console.Write("Enter min (0 or above): "); 
-                    shortMin = short.Parse(Console.ReadLine()); 
-                    Console.Write("Enter max (0 or above): ");
-                    shortMax = short.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.ReorderLevel >= shortMin && p.ReorderLevel <= shortMax).ToList();
+                    if(!short.TryParse(Console.ReadLine(), out shortMin))
+                        logger.Error("Invalid Int"); 
+                    else{
+                        Console.Write("Enter max (0 or above): ");
+                        if(!short.TryParse(Console.ReadLine(), out shortMax))
+                            logger.Error("Invalid int") ;
+                        else
+                            products = db.Products.Where(p => p.ReorderLevel >= shortMin && p.ReorderLevel <= shortMax).ToList();
+                    }
                     break; 
                 case "10": 
                     Console.Write("Enter discontinued (true/false): "); 
-                    bool discont = bool.Parse(Console.ReadLine()); 
-                    products = db.Products.Where(p => p.Discontinued == discont).ToList(); 
+                    bool discont;
+                    if(!bool.TryParse(Console.ReadLine(), out discont))
+                        logger.Error("Invaid boolean"); 
+                    else 
+                        products = db.Products.Where(p => p.Discontinued == discont).ToList(); 
                     break;
             }
 
