@@ -153,7 +153,11 @@ namespace NorthwindConsole
                                         if(userChoice == "1"){
                                             Console.Write("Enter category name: ");
                                             string name = Console.ReadLine();
-                                            if(!db.Categories.Any(c => c.CategoryName == name))
+                                            if (String.IsNullOrEmpty(name)){
+                                                logger.Error("Category must have a name");
+                                                continue; 
+                                            }
+                                            else if(!db.Categories.Any(c => c.CategoryName == name))
                                                 category.CategoryName = name;
                                             else {
                                                 logger.Info($"\"{name}\" already exists");
@@ -168,17 +172,17 @@ namespace NorthwindConsole
                                     }while(userChoice != "x");
                                     
                                     try{
-                                       //save to db   
-                                       db.SaveChanges(); 
-                                       logger.Info($"Category {category.CategoryId} edited");
+                                    //save to db   
+                                    db.SaveChanges(); 
+                                    logger.Info($"Category {category.CategoryId} edited");
                                     }catch(Exception e){
                                         logger.Error(e.Message); 
-                                        continue; 
+                                            
                                     }
-                                      
+                                    
                                 } catch(Exception e){
                                     logger.Error(e.Message);
-                                    continue; 
+                                     
                                 }
                                     
                             }
@@ -440,7 +444,11 @@ namespace NorthwindConsole
                                             case "1":
                                                 Console.Write("Enter Product Name: "); 
                                                 productInfo = Console.ReadLine();
-                                                if(!db.Products.Any(p => p.ProductName == productInfo))
+                                                if(String.IsNullOrEmpty(productInfo)){
+                                                    logger.Error("Product must have a name"); 
+                                                    continue;
+                                                }
+                                                else if(!db.Products.Any(p => p.ProductName == productInfo))
                                                     product.ProductName = productInfo;
                                                 else {
                                                     logger.Info($"\"{productInfo}\" already exists");
@@ -536,9 +544,9 @@ namespace NorthwindConsole
                                     try{
                                         db.SaveChanges(); 
                                         logger.Info($"Product {product.ProductId} edited");
-                                    }catch(Exception e){
-                                        logger.Info(e.Message);
-                                    }
+                                    }catch (Exception e){
+                                        logger.Error(e.Message); 
+                                    }     
                                 }
                                 else
                                     logger.Info($"Product ID {productSearch} does not exit");
@@ -778,12 +786,13 @@ namespace NorthwindConsole
                 //ensure unqie name
                 if(db.Products.Any(p => p.ProductName.Equals(product.ProductName))){
                     isValid = false;
+                    Console.WriteLine("Uh oh"); 
                     results.Add(new ValidationResult("Product name exists", new string[] {"ProductName"})); 
                 }
                 else
                     logger.Info("Validation Passed"); 
             }
-            else{
+            if(!isValid){
                 //print/log error message
                 foreach(var result in results){
                     logger.Error($"{result.MemberNames.FirstOrDefault()} : {result.ErrorMessage}");
