@@ -96,11 +96,14 @@ namespace NorthwindConsole
                             else if(choice == "3"){
                                 try{
                                     //display category
-                                    foreach(Categories category in db.Categories){
+                                    List<Products> active; 
+                                    List<Categories> categories = db.Categories.ToList(); 
+                                    for(int i = 0; i < db.Categories.Count(); i++){
+                                        Categories category = categories[i];
                                         if(category.CategoryId != 11){
                                             //find and display active products
-                                        var active = db.Products.Where(p => p.Discontinued == false && p.CategoryId == category.CategoryId).OrderBy(p => p.ProductName);
-                                            Console.WriteLine($"{active.Count()} records returned");
+                                        active = db.Products.Where(p => p.Discontinued == false && p.CategoryId == category.CategoryId).OrderBy(p => p.ProductName).ToList();
+                                            Console.WriteLine($"\n{category.CategoryName} - {active.Count()} records returned");
                                                 foreach(Products products in active){
                                                     Console.WriteLine($"{products.ProductName}");
                                                 }
