@@ -148,6 +148,7 @@ namespace NorthwindConsole
                                     do{
                                         Console.WriteLine("1) Category Name\n2) Category Description\n\"x\" to quit");
                                         userChoice = Console.ReadLine();
+                                        logger.Info($"Edit Category Record: Category {category.CategoryId} - {category.CategoryName} - Option {userChoice} selected"); 
 
                                         if(userChoice == "1"){
                                             Console.Write("Enter category name: ");
@@ -165,16 +166,19 @@ namespace NorthwindConsole
                                         }
                                         //get updated info 
                                     }while(userChoice != "x");
+                                    
                                     try{
                                        //save to db   
                                        db.SaveChanges(); 
                                        logger.Info($"Category {category.CategoryId} edited");
                                     }catch(Exception e){
                                         logger.Error(e.Message); 
+                                        continue; 
                                     }
                                       
                                 } catch(Exception e){
                                     logger.Error(e.Message);
+                                    continue; 
                                 }
                                     
                             }
@@ -222,6 +226,7 @@ namespace NorthwindConsole
                     else if(choice == "2"){
                         Console.WriteLine("Product Menu\n1) Display Products \n2) Display Sepcific Product\n3) Add Record\n4) Edit Record\n5) Delete Record\n6) Filter Records");
                         choice = Console.ReadLine();
+                        logger.Info($"Products Menu - Option {choice} selected"); 
                         // 1) Display Products
                         if (choice == "1"){
                             Console.WriteLine("\nDisplay Products \n1) All Products \n2) Discontinued Products \n3) Active Products");
@@ -270,6 +275,7 @@ namespace NorthwindConsole
                                 else Console.ForegroundColor = ConsoleColor.White;
                                 Console.WriteLine($"{product.ProductName}");
                             }
+                            Console.ForegroundColor = ConsoleColor.White; 
                             //Ask for Name
                             Console.Write("Enter product ID: ");
                             string productID = Console.ReadLine();
@@ -421,7 +427,7 @@ namespace NorthwindConsole
                                     do{
                                         Console.WriteLine("\n1) Product Name\n2) Supplier ID\n3) Category ID\n4) Quantity Per Unit\n5) Unit Price\n6) Units in Stock\n7) Units on Order\n8) Reorder Level\n9) Discontinuted\n\"x\" to quit");
                                         change = Console.ReadLine();
-                                        logger.Info($"Edit Product Record - Option {change} selected");
+                                        logger.Info($"Edit Product Record: Product {product.ProductId} - {product.ProductName} - Option {change} selected"); 
 
                                         string productInfo;
                                         int tempInt;
@@ -590,6 +596,7 @@ namespace NorthwindConsole
                         else if(choice == "6"){
                             // create list 1
                             List<Products> query1 = getFilteredProducts(); 
+                            Console.WriteLine($"{query1.Count()} items returned"); 
                             foreach(Products product in query1){
                                 Console.WriteLine(product.ProductName); 
                             }
@@ -598,6 +605,7 @@ namespace NorthwindConsole
                             string second = Console.ReadLine(); 
                             if(second.Equals("y", StringComparison.OrdinalIgnoreCase)){
                                 List<Products> query2 = getFilteredProducts(); 
+                                Console.WriteLine($"{query2.Count()} items returned"); 
                                 foreach(Products product in query2){
                                     Console.WriteLine(product.ProductName); 
                                 }
@@ -605,6 +613,7 @@ namespace NorthwindConsole
                                 List<Products> comparison = new List<Products>(); 
                                 Console.WriteLine("1) Union\n2) Interction\n3) Except (List 1 except list 2)"); 
                                 string compare = Console.ReadLine(); 
+                                logger.Info($"Filter Products - Option {compare} selected"); 
                                 if(compare == "1")
                                     comparison = query1.Union(query2).Distinct().ToList();
                                 else if (compare == "2")
@@ -612,6 +621,7 @@ namespace NorthwindConsole
                                 else if (compare == "3")
                                     comparison = query1.Except(query2).Distinct().ToList(); 
 
+                                Console.WriteLine($"{comparison.Count()} items returned"); 
                                 foreach(Products product in comparison){
                                     Console.WriteLine(product.ProductName); 
                                 }
@@ -764,11 +774,14 @@ namespace NorthwindConsole
             var isValid = Validator.TryValidateObject(product, context, results);
             
             if(isValid){
+                logger.Info("Validation Passed"); 
                 //ensure unqie name
                 if(db.Products.Any(p => p.ProductName.Equals(product.ProductName))){
                     isValid = false;
                     results.Add(new ValidationResult("Product name exists", new string[] {"ProductName"})); 
                 }
+                else
+                    logger.Info("Validation Passed"); 
             }
             else{
                 //print/log error message
