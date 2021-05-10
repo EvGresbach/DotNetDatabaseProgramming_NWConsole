@@ -130,7 +130,7 @@ namespace NorthwindConsole
                         //3) Edit record from Categories
                         else if (choice == "3"){
                             //display all categories 
-                            var query = db.Categories.OrderBy(p => p.CategoryName);
+                            var query = db.Categories.OrderBy(p => p.CategoryId);
                             
                             foreach (var item in query)
                             {
@@ -273,7 +273,7 @@ namespace NorthwindConsole
                                 if(product.Discontinued)
                                     Console.ForegroundColor = ConsoleColor.DarkRed; 
                                 else Console.ForegroundColor = ConsoleColor.White;
-                                Console.WriteLine($"{product.ProductName}");
+                                Console.WriteLine($"{product.ProductId}: {product.ProductName}");
                             }
                             Console.ForegroundColor = ConsoleColor.White; 
                             //Ask for Name
